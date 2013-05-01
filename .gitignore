@@ -1,0 +1,25 @@
+
+# Used for Visual Studio IntelliSense
+Scripts/
+
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+pids
+logs
+results
+
+# Don't exclude fake node_modules in test/fixtures
+/node_modules
+npm-debug.log
+
+.DS_Store
+~$*
+Thumbs.db
+Desktop.ini
