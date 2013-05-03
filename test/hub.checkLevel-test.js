@@ -11,7 +11,7 @@ describe('Hub', function () {
 		it("should return the lowest minLevel from simple layers", function (done) {
 			var hub = new Hub();
 
-			hub.layers.push({ minLevel: 3 }, { minLevel: 4 });
+			hub.addLayer({ minLevel: 3 }, { minLevel: 4 });
 			hub.invoke('checkLevel', [
 				{},
 				{
@@ -25,7 +25,7 @@ describe('Hub', function () {
 		it("should wait for async getters", function (done) {
 			var hub = new Hub();
 
-			hub.layers.push(
+			hub.addLayer(
 				{ getMinLevel: function (source, cb) { setTimeout(cb.bind(null, 3), 30); } },
 				{ minLevel: 4 }
 			);
@@ -42,7 +42,7 @@ describe('Hub', function () {
 		it("should wait for async getters and ignore their results", function (done) {
 			var hub = new Hub();
 
-			hub.layers.push(
+			hub.addLayer(
 				{ getMinLevel: function (source, cb) { setTimeout(cb.bind(null, 4), 30); } },
 				{ minLevel: 3 }
 			);
@@ -59,7 +59,7 @@ describe('Hub', function () {
 		it("should ignore higher values from synchronous callbacks", function (done) {
 			var hub = new Hub();
 
-			hub.layers.push(
+			hub.addLayer(
 				{ getMinLevel: function (source, cb) { cb(4); } },
 				{ minLevel: 3 }
 			);
