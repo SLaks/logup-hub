@@ -35,6 +35,28 @@ describe('Hub', function () {
 				expect(messages.warn).to.have.property('length', 1);
 				expect(messages.error).to.have.property('length', 1);
 			});
+			it("should pick up the level if the hub is configured after attaching the logger", function () {
+				var messages = {};
+				var hub = logupHub.installHub(module);
+				var logger = logupEmitter.createLogger(module);
+				expect(logger.minLevel).to.be.above(900);
+
+				hub.configure([
+					{ type: "collector", messages: messages, minLevel: "warn" }
+				]);
+
+				expect(logger.minLevel).to.be(logupEmitter.levels.values.warn);
+
+				logger.trace("...");
+				logger.info("Hi!");
+				logger.warn("Hmm?");
+				logger.error("Bye!");
+
+				expect(messages.trace).to.be.empty();
+				expect(messages.info).to.be.empty();
+				expect(messages.warn).to.have.property('length', 1);
+				expect(messages.error).to.have.property('length', 1);
+			});
 			describe('when minLevel is not set', function () {
 				it("should log everything", function () {
 					var messages = {};
@@ -131,6 +153,97 @@ describe('Hub', function () {
 					expect(messages2.info).to.have.property('length', 1);
 					expect(messages2.warn).to.have.property('length', 1);
 				});
+			});
+		});
+
+		describe('packages', function () {
+			it("should set different levels for configured sources", function () {
+				var messages = {};
+				var hub = logupHub.configureHub(module, [
+					{ type: "collector", messages: messages, packages: "dummy: error, library: trace, common: warn" }
+				]);
+				var myLogger = logupEmitter.createLogger(module);
+				var dummyLogger = require('./fixtures/node_modules/dummy')();
+				var libraryLogger = require('./fixtures/node_modules/library')();
+				var commonLogger = require('./fixtures/node_modules/library/node_modules/common')();
+
+				expect(myLogger.minLevel).to.be.above(900);
+				expect(dummyLogger.minLevel).to.be(logupEmitter.levels.values.error);
+				expect(libraryLogger.minLevel).to.be(logupEmitter.levels.values.trace);
+				expect(commonLogger.minLevel).to.be(logupEmitter.levels.values.warn);
+			});
+			it("should respect minLevel from parent groups", function () {
+				var messages1 = {};
+				var messages2 = {};
+				var hub = logupHub.configureHub(module, [
+						{
+							type: "filter", minLevel: "warn",
+							layers: [
+								{ type: "collector", messages: messages1 },
+								{ type: "collector", messages: messages2, packages: "dummy: error, library: trace, common: warn" }
+							]
+						}
+				]);
+				var myLogger = logupEmitter.createLogger(module);
+				var dummyLogger = require('./fixtures/node_modules/dummy')();
+				var libraryLogger = require('./fixtures/node_modules/library')();
+				var commonLogger = require('./fixtures/node_modules/library/node_modules/common')();
+
+				[myLogger, dummyLogger, libraryLogger, commonLogger].forEach(function (logger) {
+					logger.trace("...");
+					logger.info("Hi!");
+					logger.warn("Hmm?");
+					logger.error("Bye!");
+
+					// All of the loggers should get the minimum of the unconfigured child
+					expect(logger).to.have.property('minLevel', logupEmitter.levels.values.warn);
+				});
+
+				expect(messages1.trace).to.be.empty();
+				expect(messages1.info).to.be.empty();
+
+				expect(messages2.trace).to.be.empty();
+				expect(messages2.info).to.be.empty();
+				expect(messages1.warn).to.have.length(4);	// 1 message * 4 loggers
+				expect(messages1.error).to.have.length(4);	// 1 message * 4 loggers
+
+				expect(messages2.warn).to.have.length(2);	// One of the loggers is only error.
+				expect(messages2.error).to.have.length(3);	// All three loggers are error or lower
+			});
+
+
+			it("should respect wildcards", function () {
+				var messages1 = {}, messages2 = {};
+				var hub = logupHub.configureHub(module, [
+					{ type: "collector", messages: messages1, minLevel: "warn", package: "dummy" },
+					{ type: "collector", messages: messages2, packages: "*: error, library: trace, common: warn" }
+				]);
+				var myLogger = logupEmitter.createLogger(module);
+				var dummyLogger = require('./fixtures/node_modules/dummy')();
+				var libraryLogger = require('./fixtures/node_modules/library')();
+				var commonLogger = require('./fixtures/node_modules/library/node_modules/common')();
+
+				expect(myLogger.minLevel).to.be(logupEmitter.levels.values.error);		// Nothing but *
+				expect(dummyLogger.minLevel).to.be(logupEmitter.levels.values.warn);	// Other logger
+				expect(libraryLogger.minLevel).to.be(logupEmitter.levels.values.trace);	// Explicit in packages
+				expect(commonLogger.minLevel).to.be(logupEmitter.levels.values.warn);	// Explicit in packages
+
+				[myLogger, dummyLogger, libraryLogger, commonLogger].forEach(function (logger) {
+					logger.trace("...");
+					logger.info("Hi!");
+					logger.warn("Hmm?");
+					logger.error("Bye!");
+				});
+
+				expect(messages1.trace).to.be.empty();
+				expect(messages1.info).to.be.empty();
+				expect(messages1.warn).to.have.length(1);	// Only one logger
+				expect(messages1.error).to.have.length(1);
+
+				expect(messages2.trace).to.have.length(1);	// One package at trace
+				expect(messages2.info).to.have.length(1);
+				expect(messages2.warn).to.have.length(2);	// Two packages at warn
+				expect(messages2.error).to.have.length(4);	// Everything
 			});
 		});
 	});
