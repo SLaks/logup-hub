@@ -1,5 +1,5 @@
 /*jshint node: true, camelcase: true, eqeqeq: true, forin: true, immed: true, latedef: true, newcap: true, noarg: true, undef: true, globalstrict: true*/
-/*global describe:false, it:false, mocha: false */
+/*global describe:false, it:false, mocha: false, beforeEach: false */
 "use strict";
 
 var expect = require('expect.js');
@@ -32,8 +32,8 @@ describe('Hub', function () {
 
 				expect(messages.trace).to.be.empty();
 				expect(messages.info).to.be.empty();
-				expect(messages.warn).to.have.property('length', 1);
-				expect(messages.error).to.have.property('length', 1);
+				expect(messages.warn).to.have.length(1);
+				expect(messages.error).to.have.length(1);
 			});
 			it("should pick up the level if the hub is configured after attaching the logger", function () {
 				var messages = {};
@@ -54,8 +54,8 @@ describe('Hub', function () {
 
 				expect(messages.trace).to.be.empty();
 				expect(messages.info).to.be.empty();
-				expect(messages.warn).to.have.property('length', 1);
-				expect(messages.error).to.have.property('length', 1);
+				expect(messages.warn).to.have.length(1);
+				expect(messages.error).to.have.length(1);
 			});
 			describe('when minLevel is not set', function () {
 				it("should log everything", function () {
@@ -71,10 +71,10 @@ describe('Hub', function () {
 					logger.warn("Hmm?");
 					logger.error("Bye!");
 
-					expect(messages.trace).to.have.property('length', 1);
-					expect(messages.info).to.have.property('length', 1);
-					expect(messages.warn).to.have.property('length', 1);
-					expect(messages.error).to.have.property('length', 1);
+					expect(messages.trace).to.have.length(1);
+					expect(messages.info).to.have.length(1);
+					expect(messages.warn).to.have.length(1);
+					expect(messages.error).to.have.length(1);
 				});
 				it("should inherit minLevel from parent group", function () {
 					var messages = {};
@@ -94,8 +94,8 @@ describe('Hub', function () {
 
 					expect(messages.trace).to.be.empty();
 					expect(messages.info).to.be.empty();
-					expect(messages.warn).to.have.property('length', 1);
-					expect(messages.error).to.have.property('length', 1);
+					expect(messages.warn).to.have.length(1);
+					expect(messages.error).to.have.length(1);
 				});
 				it("should inherit minLevel from parent group in the presence of other loggers", function () {
 					var messages1 = {}, messages2 = {};
@@ -118,13 +118,13 @@ describe('Hub', function () {
 
 					expect(messages1.trace).to.be.empty();
 					expect(messages1.info).to.be.empty();
-					expect(messages1.warn).to.have.property('length', 1);
-					expect(messages1.error).to.have.property('length', 1);
+					expect(messages1.warn).to.have.length(1);
+					expect(messages1.error).to.have.length(1);
 
 					expect(messages2.trace).to.be.empty();
 					expect(messages2.info).to.be.empty();
 					expect(messages2.warn).to.be.empty();
-					expect(messages2.error).to.have.property('length', 1);
+					expect(messages2.error).to.have.length(1);
 				});
 			});
 
@@ -146,12 +146,12 @@ describe('Hub', function () {
 
 					expect(messages1.trace).to.be.empty();
 					expect(messages1.info).to.be.empty();
-					expect(messages1.warn).to.have.property('length', 1);
-					expect(messages1.error).to.have.property('length', 1);
+					expect(messages1.warn).to.have.length(1);
+					expect(messages1.error).to.have.length(1);
 
 					expect(messages2.trace).to.be.empty();
-					expect(messages2.info).to.have.property('length', 1);
-					expect(messages2.warn).to.have.property('length', 1);
+					expect(messages2.info).to.have.length(1);
+					expect(messages2.warn).to.have.length(1);
 				});
 			});
 		});
