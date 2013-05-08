@@ -247,5 +247,51 @@ describe('Hub', function () {
 				expect(messages2.error).to.have.length(4);	// Everything
 			});
 		});
+
+		describe('source', function () {
+			it("should filter by custom properties", function (done) {
+				var logger1 = logupEmitter.createLogger(module).describe('area', 'admin');
+				var logger2 = logupEmitter.createLogger(module);
+
+				var messages = {};
+				var hub = logupHub.configureHub(module, [
+					{ type: "collector", messages: messages, source: { area: 'admin' } }
+				]);
+				process.nextTick(function () {
+					// Wait for loggers to attach to new hub
+					expect(logger1.minLevel).to.be(0);
+					expect(logger2.minLevel).to.be.above(900);
+
+
+					logger1.info("Hi from admin!");
+					logger2.info("Hi from guest!");
+
+					expect(messages.info).to.have.length(1);
+					expect(messages.info[0]).to.have.property('message', 'Hi from admin!');
+					done();
+				});
+			});
+			it("should filter by custom properties when the properties are configured after attaching to the hub", function () {
+				var messages = {};
+				var hub = logupHub.configureHub(module, [
+					{ type: "collector", messages: messages, 'source-area': 'admin' }
+				]);
+				var logger1 = logupEmitter.createLogger(module);
+				var logger2 = logupEmitter.createLogger(module);
+
+				expect(logger1.minLevel).to.be.above(900);
+				expect(logger2.minLevel).to.be.above(900);
+
+				logger1.describe('area', 'admin');
+				expect(logger1.minLevel).to.be(0);
+
+
+				logger1.info("Hi from admin!");
+				logger2.info("Hi from guest!");
+
+				expect(messages.info).to.have.length(1);
+				expect(messages.info[0]).to.have.property('message', 'Hi from admin!');
+			});
+		});
 	});
 });
