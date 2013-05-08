@@ -157,6 +157,7 @@ describe('Hub', function () {
 		});
 
 		describe('packages', function () {
+			if (!module.filename) return;
 			it("should set different levels for configured sources", function () {
 				var messages = {};
 				var hub = logupHub.configureHub(module, [
