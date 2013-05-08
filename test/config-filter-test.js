@@ -160,7 +160,7 @@ describe('Hub', function () {
 
 		describe('packages', function () {
 			if (!module.filename) {
-				it("cannot test package configuration without module.filename")
+				it("cannot test package configuration without module.filename");
 				return;
 			}
 			it("should set different levels for configured sources", function () {
