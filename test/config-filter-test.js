@@ -11,7 +11,9 @@ require('./utils/collector-transport');	// Install this transport for use with J
 
 describe('Hub', function () {
 	beforeEach(function () {
+		// Clear old hubs, whether or not module.parent works
 		if (module['logup-hub']) module['logup-hub'].uninstall();
+		if (global['logup-hub']) global['logup-hub'].uninstall();
 	});
 
 	describe('.configure', function () {
@@ -157,7 +159,10 @@ describe('Hub', function () {
 		});
 
 		describe('packages', function () {
-			if (!module.filename) return;
+			if (!module.filename) {
+				it("cannot test package configuration without module.filename")
+				return;
+			}
 			it("should set different levels for configured sources", function () {
 				var messages = {};
 				var hub = logupHub.configureHub(module, [
