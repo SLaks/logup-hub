@@ -109,7 +109,7 @@ describe('Hub', function () {
 							type: "filter", minLevel: "warn",
 							layers: [
 								{ type: "collector", messages: messages1 },
-								{ type: "collector", minLevel: "error", messages: messages2 },
+								{ type: "collector", minLevel: "error", messages: messages2 }
 							]
 						}
 					]);
